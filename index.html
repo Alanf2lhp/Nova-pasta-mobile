@@ -250,10 +250,13 @@ canvas {
 const canvas=document.getElementById('g'),ctx=canvas.getContext('2d');
 let W=window.innerWidth,H=window.innerHeight,GROUND=H*0.78;
 
-function resizeCanvas(){W=window.innerWidth;H=window.innerHeight;GROUND=H*0.78;canvas.width=W;canvas.height=H;}
-window.addEventListener('resize',resizeCanvas);
-window.addEventListener('orientationchange',()=>setTimeout(resizeCanvas,100));
-resizeCanvas();
+function resizeCanvas(){
+  W=window.innerWidth;
+  H=window.innerHeight;
+  GROUND=H*0.75; // Era 0.78, agora 0.75 (mais acima)
+  canvas.width=W;
+  canvas.height=H;
+}
 
 let gameState='menu',mouseX=0,mouseY=0,clicked=false,keys={},frameCount=0;
 let selectedP1=null,selectedMap=0,difficulty='normal';
@@ -300,7 +303,47 @@ function backToMenu(){hideResultScreen();document.getElementById('game-over-scre
 function endGame(wp){clearInterval(timerInterval);winner=wp;domainActive=false;if(wp===player1){AudioSystem.victory();showMessage(`🏆 ${wp.name.split(' ')[0]} VENCEU!`);updateMKHUD();if(towerLevel>=maxTowers)setTimeout(()=>{gameState='victory';},1500);setTimeout(()=>showResultScreen(wp.name,true),1500);}else{AudioSystem.defeat();updateMKHUD();showGameOver();}}
 function showGameOver(){gameState='gameover';document.getElementById('game-over-screen').innerHTML=`<div class="game-over-title">GAME OVER</div><div class="game-over-subtitle">Torre ${towerLevel}/${maxTowers}${isBossFight?' - Derrotado pelo Boss!':''}</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center;"><button class="result-btn rematch" onclick="restartArcade()">🔄 TENTAR</button><button class="result-btn character" onclick="selectNewCharacterArcade()">👤 PERSONAGEM</button><button class="result-btn" onclick="backToMenu()">🏠 MENU</button></div>`;document.getElementById('game-over-screen').style.display='flex';}
 function restartArcade(){document.getElementById('game-over-screen').style.display='none';towerLevel=1;maxTowers=getMaxTowers();createArcadeGame(characters[selectedP1],difficulty);gameState='playing';}
-function createArcadeGame(p1d,diff){player1=new JujutsuFighter(120,GROUND-50,p1d,false);player1.facingRight=true;enemies=[];isBossFight=(towerLevel===maxTowers);domainActive=false;bloodDrops=[];particles=[];if(isBossFight){const b=new JujutsuFighter(W-180,GROUND-50,bossSukuna,true,diff,true);b.facingRight=false;enemies.push(b);AudioSystem.bossAppear();AudioSystem.stopAllMusic();AudioSystem.playBossMusic();showBossAlert();showMessage('👹 SUKUNA!');}else{const e=new JujutsuFighter(W-180,GROUND-50,characters[Math.floor(Math.random()*characters.length)],true,diff);e.facingRight=false;enemies.push(e);AudioSystem.stopAllMusic();AudioSystem.playBattleMusic();showMessage(`⚔️ ${e.name.split(' ')[0]}!`);}winner=null;battleTimer=99;screenShake=0;comboCount=0;comboTimer=0;showingResult=false;clearInterval(timerInterval);startBattleTimer();updateMKHUD();}
+function createArcadeGame(p1d,diff){
+  // Usar porcentagem da tela para posicionar
+  const p1X = W * 0.1; // 10% da largura
+  const enemyX = W * 0.75; // 75% da largura
+  
+  player1=new JujutsuFighter(p1X, GROUND-50, p1d, false);
+  player1.facingRight=true;
+  enemies=[];
+  isBossFight=(towerLevel===maxTowers);
+  domainActive=false;
+  bloodDrops=[];
+  particles=[];
+  
+  if(isBossFight){
+    const b=new JujutsuFighter(enemyX, GROUND-50, bossSukuna, true, diff, true);
+    b.facingRight=false;
+    enemies.push(b);
+    AudioSystem.bossAppear();
+    AudioSystem.stopAllMusic();
+    AudioSystem.playBossMusic();
+    showBossAlert();
+    showMessage('👹 SUKUNA!');
+  }else{
+    const e=new JujutsuFighter(enemyX, GROUND-50, characters[Math.floor(Math.random()*characters.length)], true, diff);
+    e.facingRight=false;
+    enemies.push(e);
+    AudioSystem.stopAllMusic();
+    AudioSystem.playBattleMusic();
+    showMessage(`⚔️ ${e.name.split(' ')[0]}!`);
+  }
+  
+  winner=null;
+  battleTimer=99;
+  screenShake=0;
+  comboCount=0;
+  comboTimer=0;
+  showingResult=false;
+  clearInterval(timerInterval);
+  startBattleTimer();
+  updateMKHUD();
+}
 function startBattleTimer(){timerInterval=setInterval(()=>{if(gameState!=='playing'||paused||showingResult)return;battleTimer--;if(battleTimer<=10&&battleTimer>0)AudioSystem.playNote(440,'square',0.05,0.02);if(battleTimer<=0){clearInterval(timerInterval);if(!winner){if(!enemies.every(e=>!e.alive))showGameOver();else endGame(player1);}}if(domainActive&&domainTimer>0){domainTimer--;if(domainTimer<=0)domainActive=false;}updateMKHUD();},1000);}
 
 function showSelectionScreen(){
