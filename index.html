@@ -304,16 +304,18 @@ function createArcadeGame(p1d,diff){player1=new JujutsuFighter(120,GROUND-50,p1d
 function startBattleTimer(){timerInterval=setInterval(()=>{if(gameState!=='playing'||paused||showingResult)return;battleTimer--;if(battleTimer<=10&&battleTimer>0)AudioSystem.playNote(440,'square',0.05,0.02);if(battleTimer<=0){clearInterval(timerInterval);if(!winner){if(!enemies.every(e=>!e.alive))showGameOver();else endGame(player1);}}if(domainActive&&domainTimer>0){domainTimer--;if(domainTimer<=0)domainActive=false;}updateMKHUD();},1000);}
 
 function showSelectionScreen(){
+  gameState = 'selecting'; // Bloqueia toques no menu
   const s=document.getElementById('selection-screen');
   let h=`<div class="selection-title">ESCOLHA SEU LUTADOR</div><div class="selection-subtitle">20 PERSONAGENS</div><div class="character-grid-mk3">`;
-  characters.forEach((c,i)=>{h+=`<div class="char-card-mk3 ${selectedP1===i?'selected':''}" ontouchstart="selectCharacter(${i})" onclick="selectCharacter(${i})"><div class="char-avatar-mk3">${c.avatar}</div><div class="char-name-mk3">${c.name.split(' ')[0]}</div><div class="char-title-mk3">${c.title}</div><div class="char-stats-mk3"><div class="char-stat-mk3"><div class="char-stat-val-mk3">❤️${c.hp}</div></div><div class="char-stat-mk3"><div class="char-stat-val-mk3">⚡${c.speed}</div></div></div><div class="char-power-mk3">⭐ ${c.power.split(' ')[0]}</div></div>`;});
+  characters.forEach((c,i)=>{h+=`<div class="char-card-mk3 ${selectedP1===i?'selected':''}" ontouchstart="event.stopPropagation();event.preventDefault();selectCharacter(${i});" onclick="event.stopPropagation();selectCharacter(${i});"><div class="char-avatar-mk3">${c.avatar}</div><div class="char-name-mk3">${c.name.split(' ')[0]}</div><div class="char-title-mk3">${c.title}</div><div class="char-stats-mk3"><div class="char-stat-mk3"><div class="char-stat-val-mk3">❤️${c.hp}</div></div><div class="char-stat-mk3"><div class="char-stat-val-mk3">⚡${c.speed}</div></div></div><div class="char-power-mk3">⭐ ${c.power.split(' ')[0]}</div></div>`;});
   h+=`</div><div class="selection-subtitle" style="margin-top:6px;">DIFICULDADE DO BOT</div><div class="diff-select">`;
-  h+=`<button class="diff-btn ${difficulty==='easy'?'selected':''}" ontouchstart="setDifficulty('easy')" onclick="setDifficulty('easy')">FÁCIL</button>`;
-  h+=`<button class="diff-btn ${difficulty==='normal'?'selected':''}" ontouchstart="setDifficulty('normal')" onclick="setDifficulty('normal')">NORMAL</button>`;
-  h+=`<button class="diff-btn ${difficulty==='hard'?'selected':''}" ontouchstart="setDifficulty('hard')" onclick="setDifficulty('hard')">DIFÍCIL</button>`;
-  h+=`</div><button class="goty-btn start-btn" ontouchstart="startArcade()" onclick="startArcade()">⚡ INICIAR (${getMaxTowers()} TORRES) ⚡</button>`;
+  h+=`<button class="diff-btn ${difficulty==='easy'?'selected':''}" ontouchstart="event.stopPropagation();event.preventDefault();setDifficulty('easy');" onclick="event.stopPropagation();setDifficulty('easy');">FÁCIL</button>`;
+  h+=`<button class="diff-btn ${difficulty==='normal'?'selected':''}" ontouchstart="event.stopPropagation();event.preventDefault();setDifficulty('normal');" onclick="event.stopPropagation();setDifficulty('normal');">NORMAL</button>`;
+  h+=`<button class="diff-btn ${difficulty==='hard'?'selected':''}" ontouchstart="event.stopPropagation();event.preventDefault();setDifficulty('hard');" onclick="event.stopPropagation();setDifficulty('hard');">DIFÍCIL</button>`;
+  h+=`</div><button class="goty-btn start-btn" ontouchstart="event.stopPropagation();event.preventDefault();startArcade();" onclick="event.stopPropagation();startArcade();">⚡ INICIAR (${getMaxTowers()} TORRES) ⚡</button>`;
   s.innerHTML=h;s.style.display='flex';
 }
+
 function selectCharacter(i){AudioSystem.select();selectedP1=i;showSelectionScreen();}
 function setDifficulty(d){AudioSystem.menuClick();difficulty=d;maxTowers=getMaxTowers();showSelectionScreen();}
 function startArcade(){if(selectedP1===null){alert('Selecione um personagem!');return;}document.getElementById('selection-screen').style.display='none';maxTowers=getMaxTowers();towerLevel=1;selectedMap=Math.floor(Math.random()*maps.length);isBossFight=false;domainActive=false;createArcadeGame(characters[selectedP1],difficulty);gameState='playing';}
