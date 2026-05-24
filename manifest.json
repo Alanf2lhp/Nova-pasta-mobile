@@ -1,0 +1,22 @@
+{
+  "name": "JJK Arena - Jujutsu Kaisen",
+  "short_name": "JJK Arena",
+  "description": "Jogo de luta Jujutsu Kaisen com 20 personagens",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0a0a0a",
+  "theme_color": "#8A2BE2",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
